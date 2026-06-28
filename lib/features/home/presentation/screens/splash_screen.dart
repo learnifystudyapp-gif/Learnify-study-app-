@@ -1,7 +1,6 @@
-import 'dart:async';
-
-import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:flutter/material.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -11,22 +10,25 @@ class SplashScreen extends StatefulWidget {
 }
 
 class _SplashScreenState extends State<SplashScreen> {
-  Timer? _navigationTimer;
-
   @override
   void initState() {
     super.initState();
-    _navigationTimer = Timer(const Duration(seconds: 2), () {
-      if (mounted) {
-        context.go('/home');
-      }
-    });
+    _checkAuthAndNavigate();
   }
 
-  @override
-  void dispose() {
-    _navigationTimer?.cancel();
-    super.dispose();
+  Future<void> _checkAuthAndNavigate() async {
+    // Small delay to show splash (optional)
+    await Future.delayed(const Duration(milliseconds: 800));
+
+    final user = Supabase.instance.client.auth.currentUser;
+
+    if (!mounted) return;
+
+    if (user != null) {
+      context.go('/home');
+    } else {
+      context.go('/login');
+    }
   }
 
   @override
@@ -36,9 +38,9 @@ class _SplashScreenState extends State<SplashScreen> {
         child: Text(
           'Learnify',
           style: Theme.of(context).textTheme.headlineLarge?.copyWith(
-            fontWeight: FontWeight.bold,
-            letterSpacing: 1.2,
-          ),
+                fontWeight: FontWeight.bold,
+                letterSpacing: 1.2,
+              ),
         ),
       ),
     );
